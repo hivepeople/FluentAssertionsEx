@@ -1,0 +1,2 @@
+# FluentAssertionsEx
+Extensions for FluentAssertions.

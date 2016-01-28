@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using FluentAssertions;
 using FluentAssertions.Common;
-using FluentAssertions.Execution;
 using NSubstitute;
 using NSubstitute.Core;
 using NSubstitute.Core.Arguments;
+using NSubstitute.Core.SequenceChecking;
+using NSubstitute.Exceptions;
 
 namespace HivePeople.FluentAssertionsEx
 {
@@ -15,9 +15,6 @@ namespace HivePeople.FluentAssertionsEx
     // to an inner namespace, we effectively prioritize extension methods from that using declarations namespace.
     // See: http://codeblog.jonskeet.uk/2010/11/03/using-extension-method-resolution-rules-to-decorate-awaiters/
     using System.Linq;
-    using System.Threading;
-    using NSubstitute.Core.SequenceChecking;
-    using NSubstitute.Exceptions;
 
     /// <summary>
     /// Bridges the gap between NSubstitute and Fluent Assertions. Inspired by a blog post by Rory Primrose, but this
@@ -27,179 +24,11 @@ namespace HivePeople.FluentAssertionsEx
     /// <see cref="http://www.neovolve.com/2014/10/07/bridging-between-nsubstitute-and-fluentassertions/"/>
     public static class Fluent
     {
-        public class CancellationTokenAssertions
-        {
-            public CancellationToken Subject { get; private set; }
-
-            internal CancellationTokenAssertions(CancellationToken actualCancellationToken)
-            {
-                this.Subject = actualCancellationToken;
-            }
-
-            public AndConstraint<CancellationTokenAssertions> BeEmpty(string because = "", params object[] reasonArgs)
-            {
-                Execute.Assertion
-                    .ForCondition(Subject.Equals(CancellationToken.None))
-                    .BecauseOf(because, reasonArgs)
-                    .FailWith("Expected {context:cancellation token} to be empty (equal default(CancellationToken){reason}.");
-
-                return new AndConstraint<CancellationTokenAssertions>(this);
-            }
-
-            public AndConstraint<CancellationTokenAssertions> NotBeEmpty(string because = "", params object[] reasonArgs)
-            {
-                Execute.Assertion
-                    .ForCondition(!Subject.Equals(CancellationToken.None))
-                    .BecauseOf(because, reasonArgs)
-                    .FailWith("Did not expect {context:cancellation token} to be empty (equal default(CancellationToken){reason}.");
-
-                return new AndConstraint<CancellationTokenAssertions>(this);
-            }
-
-            public AndConstraint<CancellationTokenAssertions> BeCancellable(string because = "", params object[] reasonArgs)
-            {
-                Execute.Assertion
-                    .ForCondition(Subject.CanBeCanceled)
-                    .BecauseOf(because, reasonArgs)
-                    .FailWith("Expected {context:cancellation token} to be cancellable{reason}.");
-
-                return new AndConstraint<CancellationTokenAssertions>(this);
-            }
-
-            public AndConstraint<CancellationTokenAssertions> NotBeCancellable(string because = "", params object[] reasonArgs)
-            {
-                Execute.Assertion
-                    .ForCondition(!Subject.CanBeCanceled)
-                    .BecauseOf(because, reasonArgs)
-                    .FailWith("Did not expect {context:cancellation token} to be cancellable{reason}.");
-
-                return new AndConstraint<CancellationTokenAssertions>(this);
-            }
-
-            public AndConstraint<CancellationTokenAssertions> BeCancelled(string because = "", params object[] reasonArgs)
-            {
-                Execute.Assertion
-                    .ForCondition(Subject.IsCancellationRequested)
-                    .BecauseOf(because, reasonArgs)
-                    .FailWith("Expected {context:cancellation token} to be cancelled{reason}.");
-
-                return new AndConstraint<CancellationTokenAssertions>(this);
-            }
-
-            public AndConstraint<CancellationTokenAssertions> NotBeCancelled(string because = "", params object[] reasonArgs)
-            {
-                Execute.Assertion
-                    .ForCondition(!Subject.IsCancellationRequested)
-                    .BecauseOf(because, reasonArgs)
-                    .FailWith("Did not expect {context:cancellation token} to be cancelled{reason}.");
-
-                return new AndConstraint<CancellationTokenAssertions>(this);
-            }
-        }
-
-        public class TaskAssertions
-        {
-            public Task Subject { get; private set; }
-
-            internal TaskAssertions(Task actualTask)
-            {
-                this.Subject = actualTask;
-            }
-
-            public AndConstraint<TaskAssertions> BeCompleted(string because = "", params object[] reasonArgs)
-            {
-                // Freeze actual value, since the status of a task may change during execution
-                var actualStatus = Subject.Status;
-
-                Execute.Assertion
-                    .ForCondition(actualStatus == TaskStatus.RanToCompletion || actualStatus == TaskStatus.Faulted || actualStatus == TaskStatus.Canceled)
-                    .BecauseOf(because, reasonArgs)
-                    .FailWith("Expected {context:task} to be completed{reason}, but its actual status was {0:G}.", actualStatus);
-
-                return new AndConstraint<TaskAssertions>(this);
-            }
-
-            public AndConstraint<TaskAssertions> NotBeCompleted(string because = "", params object[] reasonArgs)
-            {
-                // Freeze actual value, since the status of a task may change during execution
-                var actualStatus = Subject.Status;
-
-                Execute.Assertion
-                    .ForCondition(actualStatus != TaskStatus.RanToCompletion && actualStatus != TaskStatus.Faulted && actualStatus != TaskStatus.Canceled)
-                    .BecauseOf(because, reasonArgs)
-                    .FailWith("Did not expect {context:task} to be completed{reason}, but its actual status was {0:G}.", actualStatus);
-
-                return new AndConstraint<TaskAssertions>(this);
-            }
-
-            public AndConstraint<TaskAssertions> BeCompletedWithSuccess(string because = "", params object[] reasonArgs)
-            {
-                // Freeze actual value, since the status of a task may change during execution
-                var actualStatus = Subject.Status;
-
-                Execute.Assertion
-                    .ForCondition(actualStatus == TaskStatus.RanToCompletion)
-                    .BecauseOf(because, reasonArgs)
-                    .FailWith("Expected {context:task} to have completed successfully{reason}, but its actual status was {0:G}.", actualStatus);
-
-                return new AndConstraint<TaskAssertions>(this);
-            }
-
-            public AndConstraint<TaskAssertions> BeCancelled(string because = "", params object[] reasonArgs)
-            {
-                // Freeze actual value, since the status of a task may change during execution
-                var actualStatus = Subject.Status;
-
-                Execute.Assertion
-                    .ForCondition(actualStatus == TaskStatus.Canceled)
-                    .BecauseOf(because, reasonArgs)
-                    .FailWith("Expected {context:task} to be canceled{reason}, but its actual status was {0:G}.", actualStatus);
-
-                return new AndConstraint<TaskAssertions>(this);
-            }
-
-            public AndConstraint<TaskAssertions> BeFaulted(string because = "", params object[] reasonArgs)
-            {
-                return HaveStatus(TaskStatus.Faulted, because, reasonArgs);
-            }
-
-            public AndWhichConstraint<TaskAssertions, Exception> BeFaultedWithException<TException>(string because = "", params object[] reasonArgs)
-            {
-                return BeFaulted(because, reasonArgs).And.HaveException<TException>(because, reasonArgs);
-            }
-
-            public AndConstraint<TaskAssertions> HaveStatus(TaskStatus expectedStatus, string because = "", params object[] reasonArgs)
-            {
-                // Freeze actual value, since the status of a task may change during execution
-                var actualStatus = Subject.Status;
-
-                Execute.Assertion
-                    .ForCondition(actualStatus == expectedStatus)
-                    .BecauseOf(because, reasonArgs)
-                    .FailWith("Expected {context:task} to have status {0:G}{reason}, but its actual status was {1:G}.", expectedStatus, actualStatus);
-
-                return new AndConstraint<TaskAssertions>(this);
-            }
-
-            public AndWhichConstraint<TaskAssertions, Exception> HaveException<TException>(string because = "", params object[] reasonArgs)
-            {
-                // Freeze actual value, since the exception can be set during execution (we don't know if the task is running or completed)
-                var actualException = Subject.Exception;
-
-                Execute.Assertion
-                    .ForCondition(actualException is TException)
-                    .BecauseOf(because, reasonArgs)
-                    .FailWith("Expected {context:task} to have exception {0}{reason}, but found {1}.", typeof(TException), actualException);
-
-                return new AndWhichConstraint<TaskAssertions, Exception>(this, actualException);
-            }
-        }
-
-        private class AssertionMatcher<T> : IArgumentMatcher
+        private class FluentAssertionMatcher<T> : IArgumentMatcher
         {
             private readonly Action<T> assertion;
 
-            public AssertionMatcher(Action<T> assertion)
+            public FluentAssertionMatcher(Action<T> assertion)
             {
                 this.assertion = assertion;
             }
@@ -274,6 +103,7 @@ namespace HivePeople.FluentAssertionsEx
             }
         }
 
+        // TODO: Figure out how to hook this up to NSubstitute, to enable call order verification with fluent assertions
         private class FluentQuery
         {
             private readonly List<CallSpecAndTarget> querySpec = new List<CallSpecAndTarget>();
@@ -331,27 +161,6 @@ namespace HivePeople.FluentAssertionsEx
         // NOTE: This is only to emulate behaviour of ArgumentSpecificationQueue, may not be needed
         private static readonly ISubstitutionContext substitutionContextAtStart = SubstitutionContext.Current;
 
-        public static T Match<T>(Action<T> action)
-        {
-            var matcher = new AssertionMatcher<T>(action);
-            var innerArgumentSpecification = new ArgumentSpecification(typeof(T), matcher);
-            var fluentArgumentSpecification = new FluentArgumentSpecification(innerArgumentSpecification, matcher);
-
-            substitutionContextAtStart.EnqueueArgumentSpecification(fluentArgumentSpecification);
-
-            return default(T);
-        }
-
-        public static CancellationTokenAssertions Should(this CancellationToken actualValue)
-        {
-            return new CancellationTokenAssertions(actualValue);
-        }
-
-        public static TaskAssertions Should(this Task actualValue)
-        {
-            return new TaskAssertions(actualValue);
-        }
-
         /// <summary>The type of exception thrown by FA on this platform. Necessary because it varies with platform.</summary>
         private static Lazy<Type> fluentExceptionType = new Lazy<Type>(() =>
         {
@@ -367,5 +176,16 @@ namespace HivePeople.FluentAssertionsEx
             // Surely we cannot get here? ;-)
             throw new Exception("Services.ThrowException did not throw an exception!");
         });
+
+        public static T Match<T>(Action<T> action)
+        {
+            var matcher = new FluentAssertionMatcher<T>(action);
+            var innerArgumentSpecification = new ArgumentSpecification(typeof(T), matcher);
+            var fluentArgumentSpecification = new FluentArgumentSpecification(innerArgumentSpecification, matcher);
+
+            substitutionContextAtStart.EnqueueArgumentSpecification(fluentArgumentSpecification);
+
+            return default(T);
+        }
     }
 }

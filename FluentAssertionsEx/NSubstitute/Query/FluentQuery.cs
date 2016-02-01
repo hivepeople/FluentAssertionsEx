@@ -16,7 +16,6 @@ namespace HivePeople.FluentAssertionsEx.NSubstitute.Query
     // See: http://codeblog.jonskeet.uk/2010/11/03/using-extension-method-resolution-rules-to-decorate-awaiters/
     using System.Linq;
 
-    // TODO: Figure out how to hook this up to NSubstitute, to enable call order verification with fluent assertions
     public class FluentQuery
     {
         class ReferenceEqualityComparer : IEqualityComparer<object>

@@ -47,7 +47,7 @@ namespace FluentAssertionsEx.UnitTest.NSubstitute
                 mock.CompareTo(yetAnotherObj);
             });
 
-            outOfOrder.ShouldThrow<Exception>();
+            outOfOrder.ShouldThrow<CallSequenceNotFoundException>();
         }
 
         [Test]

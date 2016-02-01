@@ -57,6 +57,8 @@
     <Compile Include="Extensions\FluentAssertionsExtensions.cs" />
     <Compile Include="Fluent.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="NSubstitute\Query\FluentQuery.cs" />
+    <Compile Include="NSubstitute\Query\FluentQuerySubstitutionContext.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

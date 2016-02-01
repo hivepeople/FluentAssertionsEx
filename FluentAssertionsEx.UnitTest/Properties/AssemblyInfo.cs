@@ -4,8 +4,8 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("FluentAssertionsEx")]
-[assembly: AssemblyDescription("Extensions for FluentAssertions")]
+[assembly: AssemblyTitle("FluentAssertionsEx.UnitTest")]
+[assembly: AssemblyDescription("Extensions for FluentAssertions - Unit Tests")]
 [assembly: AssemblyCompany("HivePeople ApS")]
 [assembly: AssemblyProduct("FluentAssertionsEx")]
 [assembly: AssemblyCopyright("Copyright © HivePeople 2016")]

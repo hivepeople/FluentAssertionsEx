@@ -228,5 +228,46 @@ namespace FluentAssertionsEx.UnitTest.NSubstitute
 
             callingReceivedInAnyOrder.ShouldThrow<CallSequenceNotFoundException>();
         }
+
+        [Test]
+        public async Task ReceivedInAnyOrderAcceptsAsyncCallsMadeOutOfOrder()
+        {
+            Fluent.Init();
+
+            var mock = Substitute.For<IAsyncInterface>();
+            mock.AnotherMethodAsync().Returns(Task.FromResult(2));
+
+            await mock.SomeMethodAsync("djir");
+            await mock.AnotherMethodAsync();
+            await mock.SomeMethodAsync("yoyo");
+
+            await Fluent.ReceivedInAnyOrder(async () =>
+            {
+                await mock.SomeMethodAsync(Fluent.Match<string>(s => s.Should().Contain("yo")));
+                await mock.AnotherMethodAsync();
+                await mock.SomeMethodAsync(Fluent.Match<string>(s => s.Should().Contain("djir")));
+            });
+        }
+
+        [Test]
+        public async Task ReceivedInAnyOrderRejectsMissingAsyncCall()
+        {
+            Fluent.Init();
+
+            var mock = Substitute.For<IAsyncInterface>();
+            mock.AnotherMethodAsync().Returns(Task.FromResult(2));
+
+            await mock.SomeMethodAsync("djir");
+            await mock.AnotherMethodAsync();
+
+            Func<Task> callingReceivedInAnyOrder = () => Fluent.ReceivedInAnyOrder(async () =>
+            {
+                await mock.SomeMethodAsync(Fluent.Match<string>(s => s.Should().Contain("yo")));
+                await mock.AnotherMethodAsync();
+                await mock.SomeMethodAsync(Fluent.Match<string>(s => s.Should().Contain("djir")));
+            });
+
+            callingReceivedInAnyOrder.ShouldThrow<CallSequenceNotFoundException>();
+        }
     }
 }

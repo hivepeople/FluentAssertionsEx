@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Threading;
 using System.Threading.Tasks;
 using FluentAssertions.Common;
 using FluentAssertions.Execution;
@@ -179,6 +178,16 @@ namespace HivePeople.FluentAssertionsEx
                 throw new InvalidOperationException("Must call Fluent.Init() before creating mocks when using Fluent.ReceivedInAnyOrder");
 
             var query = fluentContext.RunFluentQuery(calls);
+            query.VerifyAnyCallOrder();
+        }
+
+        public static async Task ReceivedInAnyOrder(Func<Task> asyncCalls)
+        {
+            var fluentContext = SubstitutionContext.Current as FluentQuerySubstitutionContext;
+            if (fluentContext == null)
+                throw new InvalidOperationException("Must call Fluent.Init() before creating mocks when using Fluent.ReceivedInAnyOrder");
+
+            var query = await fluentContext.RunFluentQueryAsync(asyncCalls);
             query.VerifyAnyCallOrder();
         }
     }

@@ -135,5 +135,98 @@ namespace FluentAssertionsEx.UnitTest.NSubstitute
 
             callingReceivedInOrder.ShouldThrow<CallSequenceNotFoundException>();
         }
+
+        [Test]
+        public void ReceivedInAnyOrderAcceptsCallsMadeInOrder()
+        {
+            Fluent.Init();
+
+            var mock = Substitute.For<IComparable>();
+            var otherObj = new Object();
+            var yetAnotherObj = new Object();
+
+            mock.CompareTo(otherObj);
+            mock.CompareTo(yetAnotherObj);
+
+            Fluent.ReceivedInAnyOrder(() =>
+            {
+                mock.CompareTo(otherObj);
+                mock.CompareTo(yetAnotherObj);
+            });
+        }
+
+        [Test]
+        public void ReceivedInAnyOrderAcceptsCallsMadeOutOfOrder()
+        {
+            Fluent.Init();
+
+            var mock = Substitute.For<IComparable>();
+            var otherObj = new Object();
+            var yetAnotherObj = new Object();
+
+            mock.CompareTo(yetAnotherObj);
+            mock.CompareTo(otherObj);
+
+            Fluent.ReceivedInAnyOrder(() =>
+            {
+                mock.CompareTo(otherObj);
+                mock.CompareTo(yetAnotherObj);
+            });
+        }
+
+        [Test]
+        public void ReceivedInAnyOrderRejectsMissingCall()
+        {
+            Fluent.Init();
+
+            var mock = Substitute.For<IComparable>();
+            var otherObj = new Object();
+            var yetAnotherObj = new Object();
+
+            mock.CompareTo(otherObj);
+
+            Action callingReceivedInAnyOrder = () => Fluent.ReceivedInAnyOrder(() =>
+            {
+                mock.CompareTo(otherObj);
+                mock.CompareTo(yetAnotherObj);
+            });
+
+            callingReceivedInAnyOrder.ShouldThrow<CallSequenceNotFoundException>();
+        }
+
+        [Test]
+        public void ReceivedInAnyOrderAcceptsCallsWithFluentSpec()
+        {
+            Fluent.Init();
+
+            var mock = Substitute.For<IComparable<string>>();
+
+            mock.CompareTo("b");
+            mock.CompareTo("a");
+
+            Fluent.ReceivedInAnyOrder(() =>
+            {
+                mock.CompareTo(Fluent.Match<string>(s => s.Should().Be("a")));
+                mock.CompareTo(Fluent.Match<string>(s => s.Should().Be("b")));
+            });
+        }
+
+        [Test]
+        public void ReceivedInAnyOrderRejectsMissingCallWithFluentSpec()
+        {
+            Fluent.Init();
+
+            var mock = Substitute.For<IComparable<string>>();
+
+            mock.CompareTo("b");
+
+            Action callingReceivedInAnyOrder = () => Fluent.ReceivedInAnyOrder(() =>
+            {
+                mock.CompareTo(Fluent.Match<string>(s => s.Should().Be("a")));
+                mock.CompareTo(Fluent.Match<string>(s => s.Should().Be("b")));
+            });
+
+            callingReceivedInAnyOrder.ShouldThrow<CallSequenceNotFoundException>();
+        }
     }
 }

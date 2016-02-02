@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading;
+using System.Threading.Tasks;
 using FluentAssertions.Common;
 using HivePeople.FluentAssertionsEx.NSubstitute.Query;
 using NSubstitute.Core;
@@ -142,6 +143,16 @@ namespace HivePeople.FluentAssertionsEx
                 throw new InvalidOperationException("Must call Fluent.Init() before creating mocks when using Fluent.ReceivedInOrder");
 
             var query = fluentContext.RunFluentQuery(calls);
+            query.VerifyExactCallOrder();
+        }
+
+        public static async Task ReceivedInOrder(Func<Task> asyncCalls)
+        {
+            var fluentContext = SubstitutionContext.Current as FluentQuerySubstitutionContext;
+            if (fluentContext == null)
+                throw new InvalidOperationException("Must call Fluent.Init() before creating mocks when using Fluent.ReceivedInOrder");
+
+            var query = await fluentContext.RunFluentQueryAsync(asyncCalls);
             query.VerifyExactCallOrder();
         }
     }

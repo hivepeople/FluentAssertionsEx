@@ -1,7 +1,7 @@
 ﻿using System;
-using System.Threading;
 using System.Threading.Tasks;
 using FluentAssertions.Common;
+using FluentAssertions.Execution;
 using HivePeople.FluentAssertionsEx.NSubstitute.Query;
 using NSubstitute.Core;
 using NSubstitute.Core.Arguments;
@@ -27,8 +27,23 @@ namespace HivePeople.FluentAssertionsEx
 
             public bool IsSatisfiedBy(object argument)
             {
+                bool success = false;
+
+                // This is stupid: because AssertionScope provides no ability to peek inside and because we need to
+                // preserve any failures if we are querying, we must perform the assertion twice
+
+                // First we determine if the assertion succeeds without triggering exceptions
+                using (var assertScope = new AssertionScope())
+                {
+                    assertion((T)argument);
+                    var failures = assertScope.Discard();
+                    success = failures.Length == 0;
+                }
+
+                // Then we rerun it to either throw an exception or report error to an enclosing scope
                 assertion((T)argument);
-                return true;
+
+                return success;
             }
         }
 
@@ -154,6 +169,26 @@ namespace HivePeople.FluentAssertionsEx
 
             var query = await fluentContext.RunFluentQueryAsync(asyncCalls);
             query.VerifyExactCallOrder();
+        }
+
+        public static void ReceivedInAnyOrder(Action calls)
+        {
+            var fluentContext = SubstitutionContext.Current as FluentQuerySubstitutionContext;
+            if (fluentContext == null)
+                throw new InvalidOperationException("Must call Fluent.Init() before creating mocks when using Fluent.ReceivedInAnyOrder");
+
+            var query = fluentContext.RunFluentQuery(calls);
+            query.VerifyAnyCallOrder();
+        }
+
+        public static async Task ReceivedInAnyOrder(Func<Task> asyncCalls)
+        {
+            var fluentContext = SubstitutionContext.Current as FluentQuerySubstitutionContext;
+            if (fluentContext == null)
+                throw new InvalidOperationException("Must call Fluent.Init() before creating mocks when using Fluent.ReceivedInAnyOrder");
+
+            var query = await fluentContext.RunFluentQueryAsync(asyncCalls);
+            query.VerifyAnyCallOrder();
         }
     }
 }

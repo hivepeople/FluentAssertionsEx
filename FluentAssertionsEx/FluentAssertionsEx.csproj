@@ -61,6 +61,7 @@
     <Compile Include="NSubstitute\Query\FluentQuerySubstitutionContext.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="FluentAssertionsEx.nuspec" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup />

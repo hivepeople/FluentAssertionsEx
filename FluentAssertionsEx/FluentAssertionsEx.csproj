@@ -53,6 +53,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assertions\CancellationTokenAssertions.cs" />
+    <Compile Include="Assertions\CollectionAssertionsEx.cs" />
     <Compile Include="Assertions\TaskAssertions.cs" />
     <Compile Include="Extensions\FluentAssertionsExtensions.cs" />
     <Compile Include="Fluent.cs" />

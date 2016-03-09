@@ -269,5 +269,27 @@ namespace FluentAssertionsEx.UnitTest.NSubstitute
 
             callingReceivedInAnyOrder.ShouldThrow<CallSequenceNotFoundException>();
         }
+
+        /// <summary>
+        /// Since it is not easy to unset a fluent context, it should still support vanilla
+        /// <see cref="Received.InOrder(Action)"/> queries.
+        /// </summary>
+        [Test]
+        public void VanillaQueryingIsStillSupported()
+        {
+            Fluent.Init();
+
+            var mock = Substitute.For<IComparable>();
+            object x = new Object(), y = new Object();
+
+            mock.CompareTo(x);
+            mock.CompareTo(y);
+
+            Received.InOrder(() =>
+            {
+                mock.CompareTo(x);
+                mock.CompareTo(y);
+            });
+        }
     }
 }

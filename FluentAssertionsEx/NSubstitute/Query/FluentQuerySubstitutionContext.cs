@@ -101,10 +101,15 @@ namespace HivePeople.FluentAssertionsEx.NSubstitute.Query
         {
             innerContext.RaiseEventForNextCall(getArguments);
         }
+
+        public IQueryResults RunQuery(Action calls)
+        {
+            return innerContext.RunQuery(calls);
+        }
         #endregion Delegated members
 
         #region Specialized members
-        public bool IsQuerying { get { return query.Value != null; } }
+        public bool IsQuerying { get { return query.Value != null || innerContext.IsQuerying; } }
 
         public ISubstituteFactory SubstituteFactory { get { return substituteFactory; } }
 
@@ -113,13 +118,15 @@ namespace HivePeople.FluentAssertionsEx.NSubstitute.Query
             if (!IsQuerying)
                 throw new NotRunningAQueryException();
 
-            query.Value.Add(callSpecification, target);
-        }
-
-        public IQueryResults RunQuery(Action calls)
-        {
-            // Cannot retrofit RunQuery since IQueryResults interface doesn't make sense for FluentQuery
-            throw new NotImplementedException();
+            if (query.Value == null)
+            {
+                // Must be a legacy query, delegate
+                innerContext.AddToQuery(target, callSpecification);
+            }
+            else
+            {
+                query.Value.Add(callSpecification, target);
+            }
         }
         #endregion Specialized members
 

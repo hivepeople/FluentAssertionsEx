@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using FluentAssertions.Common;
 using FluentAssertions.Execution;
+using FluentAssertionsEx.Support;
 using HivePeople.FluentAssertionsEx.NSubstitute.Query;
 using NSubstitute.Core;
 using NSubstitute.Core.Arguments;
@@ -127,17 +128,24 @@ namespace HivePeople.FluentAssertionsEx
             throw new Exception("Services.ThrowException did not throw an exception!");
         });
 
-        public static void Init()
+        public static IDisposable EnterQueryScope()
         {
-            var activeContext = SubstitutionContext.Current;
-
-            if (activeContext is FluentQuerySubstitutionContext)
-                return;  // Nothing to do
-
             // TODO: This is not thread-safe since SubstitutionContext.Current is shared global state
             // See: https://github.com/nsubstitute/NSubstitute/issues/220
-            // Until resolved, tests that use Fluent.Init are not parallelizable with other tests using NSubstitute
-            SubstitutionContext.Current = new FluentQuerySubstitutionContext(activeContext);
+            // Until resolved, tests that use this method are not parallelizable with other tests using NSubstitute
+
+            var oldContext = SubstitutionContext.Current;
+
+            if (oldContext is FluentQuerySubstitutionContext)
+            {
+                // Already in query scope, leave current context alone
+                return new ActionDisposable(() => { });  // Do nothing on dispose
+            }
+            else
+            {
+                SubstitutionContext.Current = new FluentQuerySubstitutionContext(oldContext);
+                return new ActionDisposable(() => SubstitutionContext.Current = oldContext);  // Restore old context on dispose
+            }
         }
 
         public static T Match<T>(Action<T> action)

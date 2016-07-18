@@ -1,6 +1,8 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
+using FluentAssertions;
 using FluentAssertions.Collections;
+using FluentAssertions.Primitives;
 using HivePeople.FluentAssertionsEx.Assertions;
 
 namespace HivePeople.FluentAssertionsEx.Extensions

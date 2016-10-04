@@ -83,6 +83,7 @@
     <Compile Include="Assertions\CollectionAssertionsTest.cs" />
     <Compile Include="NSubstitute\FluentTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SelectionRules\NonInheritedPublicPropertiesSelectionRuleTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

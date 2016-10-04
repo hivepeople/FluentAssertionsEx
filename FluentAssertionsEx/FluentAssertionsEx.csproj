@@ -60,6 +60,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="NSubstitute\Query\FluentQuery.cs" />
     <Compile Include="NSubstitute\Query\FluentQuerySubstitutionContext.cs" />
+    <Compile Include="SelectionRules\NonInheritedPublicPropertiesSelectionRule.cs" />
     <Compile Include="Support\ActionDisposable.cs" />
   </ItemGroup>
   <ItemGroup>
